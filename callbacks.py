@@ -1,125 +1,85 @@
-from dash import Input, Output, State
+# callbacks.py
+
+from dash import Input, Output, callback
 import plotly.express as px
 import plotly.graph_objects as go
+import dash_bootstrap_components as dbc
+import pandas as pd
 
-def register_callbacks(app, data):
-    @app.callback(
+# Tandatangan fungsi diubah untuk menerima geojson_data
+def register_callbacks(app, data, geojson_data):
+    @callback(
         Output('time-series-plot', 'figure'),
-        [Input('indicator-selector', 'value'),
-         Input('country-selector', 'value'),
-         Input('year-slider', 'value')]
-    )
-    def update_time_series(selected_indicator, selected_countries, year_range):
-        if not selected_countries or not year_range:
-            return go.Figure().add_annotation(text="Please select countries and year range", showarrow=False)
-
-        filtered_df = data[
-            (data['Indicator'] == selected_indicator) &
-            (data['Country'].isin(selected_countries)) &
-            (data['Year'] >= year_range[0]) &
-            (data['Year'] <= year_range[1])
-        ]
-
-        if filtered_df.empty:
-            return go.Figure().add_annotation(text="No data available", showarrow=False)
-
-        fig = px.line(
-            filtered_df,
-            x='Year',
-            y='Value',
-            color='Country',
-            title=f'Trend: {selected_indicator}',
-            labels={'Value': 'Value', 'Year': 'Year'},
-            markers=True,
-            line_shape='spline'
-        )
-
-        fig.update_layout(
-            hovermode='x unified',
-            template='plotly_white',
-            height=400,
-            margin=dict(l=40, r=40, t=60, b=40)
-        )
-        return fig
-
-    @app.callback(
         Output('comparison-plot', 'figure'),
-        [Input('indicator-selector', 'value'),
-         Input('year-slider', 'value')]
+        Output('map-plot', 'figure'),
+        Output('metrics-display', 'children'),
+        Input('indicator-selector', 'value'),
+        Input('country-selector', 'value'),
+        Input('year-slider', 'value')
     )
-    def update_comparison(selected_indicator, year_range):
-        filtered_df = data[
-            (data['Indicator'] == selected_indicator) &
-            (data['Year'] >= year_range[0]) &
-            (data['Year'] <= year_range[1])
-        ]
+    def update_visuals(selected_indicator, selected_countries, year_range):
+        from dash import html
 
-        if filtered_df.empty:
-            return go.Figure().add_annotation(text="No data available", showarrow=False)
-
-        # Agregasi data
-        avg_df = filtered_df.groupby('Country', as_index=False)['Value'].mean().sort_values('Value')
-
-        fig = px.bar(
-            avg_df,
-            x='Value',
-            y='Country',
-            orientation='h',
-            title=f'Comparison: {selected_indicator}',
-            labels={'Value': 'Average Value', 'Country': ''},
-            color='Value',
-            color_continuous_scale='Teal'
+        no_data_fig = go.Figure()
+        no_data_fig.update_layout(
+            xaxis={'visible': False}, yaxis={'visible': False},
+            annotations=[{'text': 'No data for selection', 'xref': 'paper', 'yref': 'paper', 'showarrow': False, 'font': {'size': 16}}]
         )
 
-        fig.update_layout(
-            template='plotly_white',
-            height=500,
-            margin=dict(l=40, r=40, t=60, b=40),
-            yaxis={'categoryorder': 'total ascending'}
-        )
-        return fig
+        if not selected_countries:
+            no_data_fig.update_layout(annotations=[{'text': 'Please select a country'}])
+            return no_data_fig, no_data_fig, no_data_fig, []
 
-    @app.callback(
-        Output('demographic-plot', 'figure'),
-        [Input('indicator-selector', 'value'),
-         Input('country-selector', 'value'),
-         Input('year-slider', 'value')]
-    )
-    def update_demographic(selected_indicator, selected_countries, year_range):
         filtered_df = data[
             (data['Indicator'] == selected_indicator) &
             (data['Country'].isin(selected_countries)) &
-            (data['Year'] >= year_range[0]) &
-            (data['Year'] <= year_range[1])
-        ]
+            (data['Year'].between(year_range[0], year_range[1]))
+        ].copy()
 
         if filtered_df.empty:
-            return go.Figure().add_annotation(text="No data available", showarrow=False)
+            return no_data_fig, no_data_fig, no_data_fig, []
 
-        # Buat visualisasi alternatif jika data demografi tidak tersedia
-        if filtered_df['Sex'].nunique() == 1 and filtered_df['Age'].nunique() == 1:
-            fig = px.scatter(
-                filtered_df,
-                x='Year',
-                y='Value',
-                color='Country',
-                size='Value',
-                title=f'Value Distribution: {selected_indicator}',
-                labels={'Value': 'Value', 'Year': 'Year'}
-            )
-        else:
-            fig = px.sunburst(
-                filtered_df,
-                path=['Country', 'Sex', 'Age', 'Urbanization'],
-                values='Value',
-                title='Demographic Distribution',
-                color='Value',
-                color_continuous_scale='Blues'
-            )
-
-        fig.update_layout(
-            template='plotly_white',
-            height=500,
-            margin=dict(l=40, r=40, t=60, b=40)
+        # --- Grafik Tren dan Perbandingan (Tetap Sama) ---
+        fig_time = px.line(
+            filtered_df.sort_values('Year'), x='Year', y='Value', color='Country', markers=True,
+            title=f'<b>Trend: {selected_indicator}</b>'
         )
-        return fig
+        fig_time.update_layout(transition_duration=500, legend_title_text='Country', margin=dict(t=50))
+
+        latest_year_df = filtered_df.loc[filtered_df.groupby('Country')['Year'].idxmax()]
+        fig_bar = px.bar(
+            latest_year_df.sort_values('Value', ascending=True), y='Country', x='Value', color='Country',
+            title=f'<b>Comparison in Latest Year ({latest_year_df["Year"].max()})</b>', orientation='h'
+        )
+        fig_bar.update_layout(transition_duration=500, showlegend=False, margin=dict(t=50))
+        fig_bar.update_yaxes(title_text="")
+
+        # --- PEMBARUAN PENTING PADA PETA GEOGRAFIS ---
+        fig_map = px.choropleth(
+            latest_year_df,
+            geojson=geojson_data,                       # 1. Gunakan file GeoJSON Anda
+            locations='iso_alpha',                      # 2. Kolom di dataframe Anda untuk dicocokkan
+            featureidkey="properties.ISO_A3",           # 3. Path ke ID unik di file GeoJSON (biasanya kode ISO 3 huruf)
+            color='Value',
+            color_continuous_scale="Viridis",
+            hover_name='Country',
+            hover_data={'Value': ':.2f', 'Year': True}
+        )
+        # 4. Sesuaikan tampilan peta agar fokus ke lokasi yang relevan
+        fig_map.update_geos(fitbounds="locations", visible=False)
+        fig_map.update_layout(
+            title_text='<b>Geographical Distribution</b>',
+            margin={"r":0, "t":50, "l":0, "b":0},
+            transition_duration=500,
+            coloraxis_colorbar_title_text='Value'
+        )
+
+        # --- Kartu Metrik (Tetap Sama) ---
+        avg_value = filtered_df['Value'].mean()
+        max_row = filtered_df.loc[filtered_df['Value'].idxmax()]
+        metrics = [
+            dbc.Card(dbc.CardBody([html.H4("Average Value", className="card-title"), html.P(f"{avg_value:,.2f}", className="card-text fs-3")]), className="mb-3", color="light"),
+            dbc.Card(dbc.CardBody([html.H4("Highest Value", className="card-title"), html.P(f"{max_row['Value']:,.2f}", className="card-text fs-3"), html.Small(f"{max_row['Country']} ({max_row['Year']})", className="text-muted")]), className="mb-3", color="light"),
+        ]
+
+        return fig_time, fig_bar, fig_map, metrics

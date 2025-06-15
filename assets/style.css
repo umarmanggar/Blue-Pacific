@@ -1,0 +1,10 @@
+/* Contoh: Membuat semua H3 berwarna oranye gelap */
+h3 {
+    color: #D35400; /* Ini akan menimpa warna biru dari tema LUX */
+}
+
+/* Contoh: Memberi border pada semua gambar/grafik */
+.dash-graph {
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
