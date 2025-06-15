@@ -54,8 +54,9 @@ df = preprocess_data(df)
 
 # Bab 1: Data untuk Peta Langganan Seluler
 df_map = df[df['Indicator'] == "Mobile cellular subscriptions (per 100 people)"]
-df_map_latest = df_map.loc[df_map.groupby('Country')['Year'].idxmax()]
 df.reset_index(drop=True, inplace=True)
+df_map_latest = df_map.loc[df_map.groupby('Country')['Year'].idxmax()]
+
 
 # Bab 2: Data untuk Jangkauan Sinyal
 df_coverage = df[df['Indicator'] == "% of population covered by at least a 3G mobile network"]
