@@ -1,17 +1,29 @@
 import pandas as pd
 
-file_path = "data/pacific_island_countries_data.csv"
 def load_and_preprocess_data(file_path):
-    df = pd.read_csv(file_path)
+    try:
+        df = pd.read_csv(file_path)
+    except FileNotFoundError:
+        print(f"Error: File not found at {file_path}")
+        return pd.DataFrame()
+    except Exception as e:
+        print(f"Error loading CSV: {str(e)}")
+        return pd.DataFrame()
 
-    # Filter kolom relevan
-    cols_to_keep = [
+    # Pastikan kolom yang diperlukan ada
+    required_columns = [
         'INDICATOR', 'Indicator', 'GEO_PICT', 'Pacific Island Countries and territories',
         'SEX', 'Sex', 'AGE', 'Age', 'URBANIZATION', 'Urbanization',
-        'TIME_PERIOD', 'Time', 'OBS_VALUE', 'Observation value',
-        'UNIT_MEASURE', 'Unit of measure', 'DATA_SOURCE', 'Data source'
+        'TIME_PERIOD', 'Time', 'OBS_VALUE', 'Observation value'
     ]
-    df = df[cols_to_keep]
+
+    missing_cols = [col for col in required_columns if col not in df.columns]
+    if missing_cols:
+        print(f"Warning: Missing columns - {', '.join(missing_cols)}")
+        return pd.DataFrame()
+
+    # Filter kolom relevan
+    df = df[required_columns]
 
     # Clean data
     df = df.rename(columns={

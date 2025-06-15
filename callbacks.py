@@ -10,6 +10,9 @@ def register_callbacks(app, data):
          Input('year-slider', 'value')]
     )
     def update_time_series(selected_indicator, selected_countries, year_range):
+        if not selected_countries or not year_range:
+            return go.Figure().add_annotation(text="Please select countries and year range", showarrow=False)
+
         filtered_df = data[
             (data['Indicator'] == selected_indicator) &
             (data['Country'].isin(selected_countries)) &

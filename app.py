@@ -24,4 +24,4 @@ register_callbacks(app, data)
 
 # Jalankan aplikasi
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run(debug=True)
