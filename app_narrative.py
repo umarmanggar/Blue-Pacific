@@ -48,13 +48,12 @@ def preprocess_data(df):
     return df
 
 df = preprocess_data(df)
-
+df.reset_index(drop=True, inplace=True)
 
 # --- 2. PERSIAPAN DATA UNTUK SETIAP "BAB" CERITA ---
 
 # Bab 1: Data untuk Peta Langganan Seluler
 df_map = df[df['Indicator'] == "Mobile cellular subscriptions (per 100 people)"]
-df.reset_index(drop=True, inplace=True)
 df_map_latest = df_map.loc[df_map.groupby('Country')['Year'].idxmax()]
 
 
