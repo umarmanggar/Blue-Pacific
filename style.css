@@ -3,104 +3,122 @@
 /* General styling */
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #f0f8ff;
+    background: linear-gradient(135deg, #f0f8ff 0%, #e6f7ff 100%);
     color: #003366;
+    line-height: 1.6;
 }
 
 /* Header styling */
-h1 {
+h1, h2, h3, h4 {
     color: #0066cc;
-    border-bottom: 2px solid #0099cc;
-    padding-bottom: 10px;
+    font-weight: 600;
+}
+
+h1 {
+    border-bottom: 3px solid #0099cc;
+    padding-bottom: 15px;
+    margin-bottom: 25px;
 }
 
 /* Sidebar styling */
 [data-testid="stSidebar"] {
-    background-color: #e6f7ff;
+    background: rgba(230, 247, 255, 0.9);
+    backdrop-filter: blur(5px);
     padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 15px;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+    border: 1px solid #cce6ff;
 }
 
 /* Button styling */
 .stButton>button {
-    background-color: #0099cc;
+    background: linear-gradient(to right, #0099cc, #0066cc);
     color: white;
-    border-radius: 5px;
+    border-radius: 8px;
     border: none;
-    padding: 8px 16px;
-    transition: background-color 0.3s;
+    padding: 10px 20px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0, 153, 204, 0.3);
 }
 
 .stButton>button:hover {
-    background-color: #0077b3;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 8px rgba(0, 153, 204, 0.4);
 }
 
 /* Tab styling */
 [data-baseweb="tab-list"] {
-    background-color: #e6f7ff;
-    border-radius: 8px;
-    padding: 5px;
+    background: rgba(204, 230, 255, 0.3);
+    border-radius: 12px;
+    padding: 8px;
+    margin-bottom: 20px;
 }
 
 [data-baseweb="tab"] {
-    padding: 10px 20px;
-    border-radius: 5px;
+    padding: 12px 24px;
+    border-radius: 8px;
     margin: 0 5px;
-    transition: background-color 0.3s;
+    transition: all 0.3s ease;
+    font-weight: 600;
 }
 
 [aria-selected="true"] {
-    background-color: #0099cc;
+    background: linear-gradient(to right, #0099cc, #0066cc);
     color: white !important;
+    box-shadow: 0 4px 6px rgba(0, 153, 204, 0.3);
+}
+
+/* Card styling */
+.stPlotlyChart, .stMetric {
+    border-radius: 15px;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    background: white;
+    border: 1px solid #e1f0ff;
+    transition: transform 0.3s ease;
+}
+
+.stPlotlyChart:hover, .stMetric:hover {
+    transform: translateY(-5px);
+}
+
+/* Metric styling */
+[data-testid="metric-container"] {
+    border: 2px solid #99d6ff;
+    border-radius: 12px;
+    padding: 20px;
+    background: linear-gradient(135deg, #ffffff 0%, #e6f7ff 100%);
+    box-shadow: 0 4px 8px rgba(0, 102, 204, 0.2);
+    text-align: center;
+}
+
+[data-testid="metric-value"] {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #0066cc;
 }
 
 /* Footer styling */
 footer {
     text-align: center;
     padding: 20px;
+    margin-top: 40px;
+    background: rgba(0, 102, 204, 0.1);
+    border-radius: 12px;
     font-size: 0.9rem;
-    color: #666;
+    color: #0066cc;
+    border-top: 2px solid #99d6ff;
 }
 
-/* Custom card styling */
-.stPlotlyChart {
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    padding: 15px;
-    background-color: white;
-}
-
-/* Custom metric styling */
-[data-testid="metric-container"] {
-    border: 1px solid #cce6ff;
-    border-radius: 8px;
-    padding: 15px;
-    background-color: white;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-}
-
-/* Custom color for success messages */
-.stAlert [data-baseweb="notification"] {
-    background-color: #e6fff2 !important;
-    border-color: #00cc66 !important;
-}
-
-/* Custom color for warning messages */
-.stAlert [data-baseweb="notification"].stNotification.warning {
-    background-color: #fff9e6 !important;
-    border-color: #ffcc00 !important;
-}
-
-/* Custom color for error messages */
-.stAlert [data-baseweb="notification"].stNotification.error {
-    background-color: #ffe6e6 !important;
-    border-color: #ff3333 !important;
-}
-
-/* Responsive adjustments */
+/* Responsive design */
 @media (max-width: 768px) {
     [data-testid="stSidebar"] {
         width: 100% !important;
+        margin-bottom: 20px;
+    }
+
+    [data-testid="metric-container"] {
+        margin-bottom: 15px;
     }
 }
