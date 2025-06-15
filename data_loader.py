@@ -2,7 +2,17 @@ import pandas as pd
 
 def load_and_preprocess_data(file_path):
     try:
-        df = pd.read_csv(file_path, encoding='latin1')
+        # Coba beberapa encoding yang umum
+        for encoding in ['utf-8', 'latin1', 'iso-8859-1', 'cp1252']:
+            try:
+                df = pd.read_csv(file_path, encoding=encoding)
+                print(f"Berhasil memuat file dengan encoding: {encoding}")
+                break
+            except UnicodeDecodeError:
+                continue
+        else:
+            # Jika semua encoding gagal
+            raise ValueError("Gagal menentukan encoding file")
     except Exception as e:
         print(f"Error loading data: {e}")
         return pd.DataFrame()
